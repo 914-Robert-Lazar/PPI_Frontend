@@ -73,7 +73,7 @@ if uploaded_file is not None:
         try:
             with st.spinner("Processing the file..."):
                 files = {"file": uploaded_file}
-                response = requests.post("http://localhost:8000/get-cross-correlation/", files=files)
+                response = requests.post("https://ppi-backend-ejsz.onrender.com/get-cross-correlation/", files=files)
 
                 if response.status_code == 200:
                     st.success("File processed successfully! Retrieving results...")
@@ -144,7 +144,7 @@ if uploaded_file is not None:
         try:
             with st.spinner("Processing the file..."):
                 files = {"file": uploaded_file}
-                response = requests.post("http://localhost:8000/analyze-data/", files=files)
+                response = requests.post("https://ppi-backend-ejsz.onrender.com/analyze-data/", files=files)
 
                 if response.status_code == 200:
                     st.success("File processed successfully! Retrieving results...")
