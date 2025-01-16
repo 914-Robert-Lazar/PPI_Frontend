@@ -5,9 +5,17 @@ import io
 from PIL import Image
 from collections import OrderedDict, defaultdict
 
-st.title("Mitral Insights Analyzer")
-st.text("This project focuses on the analysis of patients affected by mitral regurgitation, a condition where the heart's mitral valve does not close tightly," +
-         "causing blood to flow backward into the heart. Our goal is to leverage patient data to identify and analyze various clinical parameters that influence the severity and size of the regurgitation.")
+st.title("🫀Mitral Insights Analyzer")
+st.markdown(
+    """
+    <h4>Welcome to the Mitral Insights Analyzer!</h4> 
+    <p style='font-size:18px;'>This tool helps analyze data from patients affected by <b>mitral regurgitation</b>, a condition where the heart's mitral valve doesn't close tightly, causing blood to flow backward.</p>
+     
+    <p style='font-size:18px;'>Our goal is to leverage patient data to <b>identify key clinical parameters</b> that influence the <b>severity and size</b> of the regurgitation.</p>
+
+    <p style='font-size:18px;'>📊 Upload your Excel file, and let’s dive into the insights together!</p>
+    """, unsafe_allow_html=True
+)
 
 uploaded_file = st.file_uploader("Upload your Excel file with patience data here", type=['xlsx'])
 
@@ -58,8 +66,6 @@ if uploaded_file is not None:
                         col_headers = sorted(col_headers)
 
                         # Create a table for the patient
-                        # st.write("| Criteria | " + " | ".join(col_headers) + " |")
-                        # st.write("|---|" + "---|" * len(col_headers))
                         for row_criteria, col_data in comparisons.items():
                             row = st.columns(spec=len(col_headers))
                             i = 0
