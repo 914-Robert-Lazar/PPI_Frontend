@@ -3,7 +3,7 @@ import requests
 import zipfile
 import io
 from PIL import Image
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 
 st.title("🫀Mitral Insights Analyzer")
 st.markdown(
@@ -55,11 +55,6 @@ with st.expander("File constraints"):
 
         """, unsafe_allow_html=True
     )
-if "cross_correlation" not in st.session_state:
-    st.session_state.cross_correlation = False
-
-if "analysis_prediction" not in st.session_state:
-    st.session_state.analysis_prediction = False
 
 uploaded_file = st.file_uploader("Upload your Excel file with patience data here", type=['xlsx'])
 
@@ -69,7 +64,6 @@ if uploaded_file is not None:
     analysis_prediction_button = st.button("Process File for Analysis and Prediction")
 
     if cross_correlation_button:
-        st.session_state.analysis_prediction = False
         try:
             with st.spinner("Processing the file..."):
                 files = {"file": uploaded_file}
@@ -100,47 +94,32 @@ if uploaded_file is not None:
 
                                     patient_images[patient][row_criteria][col_criteria] = image
 
-                    st.session_state.patient_images = patient_images
-                    st.session_state.cross_correlation = True
+                        # Display results in tables for each patient
+                    for patient, comparisons in patient_images.items():
+                        st.subheader(f"Results for {patient}")
+
+                        # Collect all column headers
+                        col_headers = set()
+                        for row_data in comparisons.values():
+                            col_headers.update(row_data.keys())
+                        col_headers = sorted(col_headers)
+
+                        # Create a table for the patient
+                        for row_criteria, col_data in comparisons.items():
+                            row = st.columns(spec=len(col_headers))
+                            i = 0
+                            for col_criteria in col_headers:
+                                if col_criteria in col_data:
+                                    image = col_data[col_criteria]
+                                    row[i].image(image=image, caption=f"{row_criteria} vs {col_criteria}")
+                                i += 1
                 else:
                     st.error(f"❌ Failed to process the file. Error: {response.text}")
 
         except Exception as e:
             st.error(f"⚠️ An error occurred: {str(e)}")
-    if st.session_state.cross_correlation:
     
-        def next(): 
-            if st.session_state.patient_counter < len(st.session_state.patient_images) - 1:
-                st.session_state.patient_counter += 1
-        def prev(): 
-            if st.session_state.patient_counter > 0:
-                st.session_state.patient_counter -= 1
-
-        if 'patient_counter' not in st.session_state: st.session_state.patient_counter = 0
-
-        patient_images = st.session_state.patient_images
-        patient_list = list(patient_images.keys())
-        selected_patient = patient_list[st.session_state.patient_counter]
-
-        comparisons = patient_images[selected_patient]
-        st.subheader(f"📊 Results for {selected_patient}")
-
-        col_headers = sorted({col for row_data in comparisons.values() for col in row_data.keys()})
-
-        for row_criteria, col_data in comparisons.items():
-            row = st.columns(len(col_headers))
-            for i, col_criteria in enumerate(col_headers):
-                if col_criteria in col_data:
-                    image = col_data[col_criteria]
-                    row[i].image(image=image, caption=f"{row_criteria} vs {col_criteria}")
-
-        cols = st.columns(2)
-        with cols[1]: st.button("Next ➡️", on_click=next, use_container_width=True)
-        with cols[0]: st.button("⬅️ Previous", on_click=prev, use_container_width=True) 
-
-            
     if analysis_prediction_button:
-        st.session_state.cross_correlation = False
         try:
             with st.spinner("Processing the file..."):
                 files = {"file": uploaded_file}
@@ -191,48 +170,27 @@ if uploaded_file is not None:
                     #                 analysis_images[type][row_criteria] = OrderedDict()
 
                     #             analysis_images[type][row_criteria][col_criteria] = image
-                    
-                    st.session_state.analysis_images = analysis_images
-                    st.session_state.analysis_prediction = True
 
-    
+                    for type, predictions in analysis_images.items():
+                        st.subheader(type)
+
+                        col_headers = set()
+                        for row_data in predictions.values():
+                            col_headers.update(row_data.keys())
+                        col_headers = sorted(col_headers)
+
+                        for row_criteria, col_data in predictions.items():
+                            row = st.columns(spec=len(col_headers))
+                            i = 0
+                            for col_criteria in col_headers:
+                                if col_criteria in col_data:
+                                    image = col_data[col_criteria]
+                                    row[i].image(image=image, caption=f"{row_criteria}: {col_criteria}")
+                                i += 1
                 else:
                     st.error(f"❌ Failed to process the file. Error: {response.text}")
 
         except Exception as e:
-            st.error(f"An error occurred: {str(e)}")
+            st.error(f"⚠️ An error occurred: {str(e)}")
 
-    if st.session_state.analysis_prediction:
-
-        def next(): 
-            if st.session_state.type_counter < len(st.session_state.analysis_images) - 1:
-                st.session_state.type_counter += 1
-        def prev(): 
-            if st.session_state.type_counter > 0:
-                st.session_state.type_counter -= 1
-
-        if 'type_counter' not in st.session_state: st.session_state.type_counter = 0
-
-        analysis_images = st.session_state.analysis_images
-        type_list = list(analysis_images.keys())
-        selected_type = type_list[st.session_state.type_counter]
-
-        predictions = analysis_images[selected_type]
-        st.subheader(selected_type)
-
-        col_headers = set()
-        for row_data in predictions.values():
-            col_headers.update(row_data.keys())
-        col_headers = sorted(col_headers)
-
-        for row_criteria, col_data in predictions.items():
-            row = st.columns(spec=len(col_headers))
-            for i, col_criteria in enumerate(col_headers):
-                if col_criteria in col_data:
-                    image = col_data[col_criteria]
-                    row[i].image(image=image, caption=f"{row_criteria}: {col_criteria}")
-
-        cols = st.columns(2)
-        with cols[1]: st.button("Next ➡️", on_click=next, use_container_width=True)
-        with cols[0]: st.button("⬅️ Previous", on_click=prev, use_container_width=True) 
 
