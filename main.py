@@ -8,6 +8,12 @@ from collections import OrderedDict
 st.title("🫀Mitral Insights Analyzer")
 st.markdown(
     """
+    <style>
+        div.stButton > button:hover {
+            background-color: #006100; /* Change color on hover */
+            color: #FFD700; /* Change text color on hover */
+        }
+    </style>
     <h4>Welcome to the Mitral Insights Analyzer!</h4> 
     <p style='font-size:18px;'>This tool helps analyze data from patients affected by <b>mitral regurgitation</b>, a condition where the heart's mitral valve doesn't close tightly, causing blood to flow backward.</p>
      
